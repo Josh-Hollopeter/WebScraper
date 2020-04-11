@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,6 +15,7 @@ import org.jsoup.select.Elements;
 public class FasterVersion {
 	public static void main(String[] args) {
 		List<String> subjects = new ArrayList<>();
+		List<Elements> elemSubjects = new ArrayList<>();
 //		List<String> courses = new ArrayList<>();
 		List <Elements> subLinks = new ArrayList<>();
 		HashMap <String,Elements> courseMap = new HashMap<>();
@@ -36,9 +38,12 @@ public class FasterVersion {
 			 * issues 3. Description 4. Full name on github
 			 */
 			for(Element link : links) {
+//				String url = link.absUrl("href");
 				Document subDoc = Jsoup.connect(link.absUrl("href")).get();
+//				WebClient wc = new WebClient();
 				subLinks.add(subDoc.select("a[href*=/course/]"));
-				subjects.add(subDoc.title());
+				subjects.add(subDoc.select("span.resultlist-unit-coursedesc").text());
+				elemSubjects.add(subDoc.select("span.resultlist-unit-coursedesc"));
 				courseMap.put(subDoc.title(),subDoc.select("a[href*=/course/]"));
 			}
 
@@ -81,14 +86,35 @@ public class FasterVersion {
 			e.printStackTrace();
 		}
 		System.out.println("here");
-		List<String> courses = new ArrayList<>();
+		List<String> courseTitles = new ArrayList<>();
+		List<List<String>> courses = new ArrayList<>();
+		List<List <String>> courseDescription = new ArrayList<>();
+		List<String> courseDescriptions = new ArrayList<>();
+		HashMap<String, String> courseJson  = new HashMap<>();
 		for( int i = 0; i < subLinks.size() ; i++) {
-		
-			courses.add(Arrays.asList(subLinks.get(i).select("a[href]").text().split("View Course")).toString());
+			courses.add(Arrays.asList(subLinks.get(i).select("a[href]").text().split("View Course")));
+			courseDescription.add(Arrays.asList(subjects.get(i).split("\\.\\.\\.")));
 			
 			
 		}
-		System.out.println(courses.get(30));
-		System.out.println(Arrays.asList(subjects.get(30).split(" ")).get(0));
+		for(int i=0; i < courses.size(); i++) {
+			for(int j = 0; j < courses.get(i).size(); j++) {
+				courseJson.put(courses.get(i).get(j), elemSubjects.get(i).get(j).text());
+				courseTitles.add(courses.get(i).get(j));
+				courseDescriptions.add(elemSubjects.get(i).get(j).text());
+				
+			}
+			
+		}
+		
+//		courseTitles.listIterator().forEachRemaining(s -> System.out.println(s));
+//		courseDescriptions.listIterator().forEachRemaining(s -> System.out.println(s));
+		JSONObject result = new JSONObject(courseJson);
+		System.out.println(courseJson.size());
+		System.out.println(result.toString(1));
+//		System.out.println(courseJson);
+//		System.out.println(courseDescription.get(0));
+//		System.out.println(courses.get(0).get(0));
+//		System.out.println(Arrays.asList(subjects.get(30).split(" ")).get(0));
 	}
 }
