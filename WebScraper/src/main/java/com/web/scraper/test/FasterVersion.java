@@ -2,6 +2,8 @@ package com.web.scraper.test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.jsoup.Jsoup;
@@ -9,12 +11,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class Testing {
-
+public class FasterVersion {
 	public static void main(String[] args) {
 		List<String> subjects = new ArrayList<>();
-		List<String> courses = new ArrayList<>();
+//		List<String> courses = new ArrayList<>();
 		List <Elements> subLinks = new ArrayList<>();
+		HashMap <String,Elements> courseMap = new HashMap<>();
+		Elements filteredLinks = null;
 		try {
 			// Here we create a document object and use JSoup to fetch the website
 			Document doc = Jsoup.connect("https://www.coursebuffet.com/areas").get();
@@ -23,24 +26,34 @@ public class Testing {
 //			System.out.printf("Title: %s\n", doc.title());
 
 			// Get the list of repositories
-			Elements links = doc.getElementsByTag("a");
+			Elements links = doc.select("a[href*=/sub/]");
+//			Elements unfilteredLinks = doc.getElementsByTag("a");
+			
+			
 
 			/**
 			 * For each repository, extract the following information: 1. Title 2. Number of
 			 * issues 3. Description 4. Full name on github
 			 */
+			for(Element link : links) {
+				Document subDoc = Jsoup.connect(link.absUrl("href")).get();
+				subLinks.add(subDoc.select("a[href*=/course/]"));
+				subjects.add(subDoc.title());
+				courseMap.put(subDoc.title(),subDoc.select("a[href*=/course/]"));
+			}
 
-			for (Element link : links) {
-				if (link.attributes().toString().contains("sub")) {
-					Document subDoc = Jsoup.connect(link.absUrl("href")).get();
-//					System.out.println("********** " + subDoc.title());
-				if(subDoc.body().child(2).getElementsByTag("a").toString().contains("course")){
-					subLinks.add(subDoc.body().child(2).getElementsByTag("a"));
-					
-				}
-//					System.out.println(subDoc.body().child(2).text() + "******************");
-					subjects.add(link.text());
-				}
+//				System.out.println(link.text());
+//				if (link.attributes().toString().contains("sub")) {
+//					filteredLinks.add(link);
+////					Document subDoc = Jsoup.connect(link.absUrl("href")).get();
+////					System.out.println("********** " + subDoc.title());
+//				if(subDoc.body().child(2).getElementsByTag("a").toString().contains("course")){
+//					subLinks.add(subDoc.body().child(2).getElementsByTag("a"));
+//					
+//				}
+////					System.out.println(subDoc.body().child(2).text() + "******************");
+//					subjects.add(link.text());
+//				}
 
 //	        // Extract the title
 //	        String repositoryTitle = repository.getElementsByClass("repo-item-title").text();
@@ -62,33 +75,20 @@ public class Testing {
 //	        System.out.println("\t" + repositoryDescription);
 //	        System.out.println("\t" + repositoryGithubLink);
 //	        System.out.println("\n");
-			}
 
 			// In case of any IO errors, we want the messages written to the console
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Here");
-		int count = 0;
-		for (Elements coursess : subLinks) {
-			for (Element course : coursess) {
-				if(course.attributes().toString().contains("course")) {
-					try {
-						Document subDoc = Jsoup.connect(course.absUrl("href")).get();
-						System.out.println(subDoc.title());
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-					
-					count++;
-				}
+		System.out.println("here");
+		List<String> courses = new ArrayList<>();
+		for( int i = 0; i < subLinks.size() ; i++) {
+		
+			courses.add(Arrays.asList(subLinks.get(i).select("a[href]").text().split("View Course")).toString());
 			
-			}
-
+			
 		}
-		System.out.println(count++);
+		System.out.println(courses.get(30));
+		System.out.println(Arrays.asList(subjects.get(30).split(" ")).get(0));
 	}
-
 }
