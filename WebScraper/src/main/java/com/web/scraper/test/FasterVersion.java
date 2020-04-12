@@ -1,5 +1,7 @@
 package com.web.scraper.test;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -110,6 +112,16 @@ public class FasterVersion {
 //		courseTitles.listIterator().forEachRemaining(s -> System.out.println(s));
 //		courseDescriptions.listIterator().forEachRemaining(s -> System.out.println(s));
 		JSONObject result = new JSONObject(courseJson);
+		try {
+			String path = System.getProperty("user.home") + File.separator + "Desktop";
+			File file = new File(path,"courses.json");
+			FileWriter fw = new FileWriter(file);
+			fw.write(result.toString(1));
+			fw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println(courseJson.size());
 		System.out.println(result.toString(1));
 //		System.out.println(courseJson);
