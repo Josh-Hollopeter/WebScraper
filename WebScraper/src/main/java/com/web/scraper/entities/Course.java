@@ -1,23 +1,19 @@
 package com.web.scraper.entities;
 
 public class Course {
-
+	
 	private String subject;
-
+	
 	private String title;
-
+	
 	private String description;
-
+	
 	private String mentor;
-
+	
 	private String effort;
+	
+	private Double duration;
 
-	private String duration;
-
-	
-	
-	
-	
 	public String getSubject() {
 		return subject;
 	}
@@ -58,12 +54,13 @@ public class Course {
 		this.effort = effort;
 	}
 
-	public String getDuration() {
+	public Double getDuration() {
 		return duration;
 	}
 
-	public void setDuration(String duration) {
+	public void setDuration(Double duration) {
 		this.duration = duration;
 	}
+	
 
 }
